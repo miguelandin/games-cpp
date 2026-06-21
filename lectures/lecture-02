@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
   // the imgui color {r, g, b} wheel requires floats from 0-1
   // sfml will require instead of unit8_t from 0-255
   // this is the only really annoying conversion between sflm and imgui
-  float c[3] = {0.0f, 1.0f, 1.0f};
+  float color[3] = {0.0f, 1.0f, 1.0f};
 
   // let's make a shape that will draw to the screen
   float circleRadius = 50.0f;
@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
     ImGui::Checkbox("Draw Text", &drawText);
     ImGui::SliderFloat("Radius", &circleRadius, 0.0f, 300.0f);
     ImGui::SliderInt("Sides", &circleSegments, 3, 64);
-    ImGui::ColorEdit3("Color circle", c);
+    ImGui::ColorEdit3("Color circle", color);
     ImGui::InputText("Text", displayString, 255);
 
     if (ImGui::Button("Set Text"))
@@ -117,8 +117,8 @@ int main(int argc, char *argv[]) {
 
     // imgui uses 0-1 float for colors, sfml uses 0-255 for colors
     // we must convert from ui floats to sfml Uint8
-    circle.setFillColor(sf::Color(uint8_t(c[0] * 255), uint8_t(c[1] * 255),
-                                  uint8_t(c[2] * 255)));
+    circle.setFillColor(sf::Color(uint8_t(color[0] * 255), uint8_t(color[1] * 255),
+                                  uint8_t(color[2] * 255)));
 
     // basic animation - move the circle each frame if it's still in frame
     circle.setPosition({circle.getPosition().x + circleSpeedX,
@@ -137,3 +137,4 @@ int main(int argc, char *argv[]) {
 
   return(0);
 }
+
