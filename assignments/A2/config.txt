@@ -1,0 +1,45 @@
+# window W H FL FS
+#	width				W			int
+#	height				H			int
+#	framerate			FL			int
+#	enable fullscreen	FS			bool
+
+# font F S R G B 
+#	font file			F			std::string	
+#	size				S			int
+#	color				R,G,B		int,int,int
+
+# player SR CR S FR FG FB OR OG OB OT P
+#	shape radius		SR			float
+#	collision radius	CR			int
+#	speed				S			float
+#	fill color rgb		FR,FG,FB	int,int,int
+#	outline color rgb	OR,OG.OB	int,int,int
+#	outline thickness	OT			float
+#	point count			p			int #name changed to align with SFML circle def
+
+# enemy SR CR SMIN SMAX OR OG OB OT PMIN PMAX L SI
+#	shape radius		SR			float 
+#	collision radius	CR			int 
+#	min / max speed		SMIN, SMAX	float,float
+#	outline color rgb	OR,OG,OB	int, int, int
+#	outline thickness	OT			float
+#	min/max points		PMIN,PMAX	int,int	
+#	small lifespan		L			int
+#	spawn internal		SI			int
+
+# bullet SR SC S FR FG FB OR OG OB OT P L
+#	shape radius		SR			float
+#	collision radius	CR			int 
+#	speed				S			float
+#	fill color rgb		FR,FG,FB	int,int,int
+#	outline color rgb	OR,OG,OB	int, int, int
+#	outline thickness	OT			float
+#	shape points		P			int
+#	lifespan			L			int
+
+Window 1280 720 60 0
+Font fonts\tech.otf 24 255 255 255
+layer 32 32 5 5 5 5 255 0 0 4 8
+Enemy 32 32 3 3 255 255 255 2 3 8 90 60
+Bullet 10 10 8 255 255 255 255 255 255 2 20 90
