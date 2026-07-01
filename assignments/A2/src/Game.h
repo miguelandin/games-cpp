@@ -47,7 +47,7 @@ class Game {
   void sEnemySpawner();
   void sCollision();
 
-  void spanwPlayer();
+  void spawnPlayer();
   void spawnEnemy();
   void spawnSmallEnemies(std::shared_ptr<Entity> entity);
   void spawnBullet(std::shared_ptr<Entity> entity, const Vec2f &mousePos);
