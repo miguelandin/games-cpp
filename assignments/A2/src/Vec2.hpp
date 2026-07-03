@@ -1,6 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include <math.h>
+#include <cmath>
 
 template <typename T> class Vec2 {
 public:
@@ -9,60 +9,68 @@ public:
 
   Vec2() = default;
   Vec2(T xin, T yin) : x(xin), y(yin) {}
-  Vec2(const sf::Vector2<T> &vec) : x(vec.x), y(vec.y) {}
-  Vec2(const sf::Vector2i &vec) : x(vec.x), y(vec.y) {}
 
-  operator sf::Vector2<T>() { return sf::Vector2<T>(x, y); }
-  Vec2 operator+(const Vec2 &rhs) const {
-    // TODO
-  }
+  template <typename U>
+  Vec2(const sf::Vector2<U> &vec)
+      : x(static_cast<T>(vec.x)), y(static_cast<T>(vec.y)) {}
 
-  Vec2 operator-(const Vec2 &rhs) const {
-    // TODO
-  }
+  operator sf::Vector2<T>() const { return sf::Vector2<T>(x, y); }
 
-  Vec2 operator/(const T val) const {
-    // TODO
-  }
+  Vec2 operator+(const Vec2 &rhs) const { return Vec2(x + rhs.x, y + rhs.y); }
 
-  Vec2 operator*(const T val) const {
-    // TODO
-  }
+  Vec2 operator-(const Vec2 &rhs) const { return Vec2(x - rhs.x, y - rhs.y); }
 
-  bool operator==(const Vec2 &rhs) const {
-    // TODO
-  }
+  Vec2 operator/(const T val) const { return Vec2(x / val, y / val); }
 
-  bool operator!=(const Vec2 &rhs) const {
-    // TODO
+  Vec2 operator*(const T val) const { return Vec2(x * val, y * val); }
+
+  bool operator==(const Vec2 &rhs) const { return (x == rhs.x && y == rhs.y); }
+
+  bool operator!=(const Vec2 &rhs) const { return (x != rhs.x || y != rhs.y); }
+
+  Vec2 &operator+=(const Vec2 &rhs) {
+    x += rhs.x;
+    y += rhs.y;
+    return *this;
   }
 
-  void operator+=(const Vec2 &rhs) {
-    // TODO
-  }
-  void operator-=(const Vec2 &rhs) {
-    // TODO
-  }
-
-  void operator*=(const Vec2 &rhs) {
-    // TODO
+  Vec2 &operator-=(const Vec2 &rhs) {
+    x -= rhs.x;
+    y -= rhs.y;
+    return *this;
   }
 
-  void operator/=(const Vec2 &rhs) {
-    // TODO
+  Vec2 &operator*=(T val) {
+    x *= val;
+    y *= val;
+    return *this;
   }
 
-  float dis(const Vec2 &rhs) {
-    // TODO
+  Vec2 &operator/=(T val) {
+    x /= val;
+    y /= val;
+    return *this;
   }
 
-  float length() const {
-    // TODO
+  T disSq(const Vec2 &rhs) const {
+    T dx = rhs.x - x;
+    T dy = rhs.y - y;
+    return (dx * dx + dy * dy);
   }
+
+  T dis(const Vec2 &rhs) const { return std::sqrt(disSq(rhs)); }
+
+  T lengthSq() const { return (x * x + y * y); }
+
+  T length() const { return std::sqrt(lengthSq()); }
 
   void normalize() {
-    // TODO
+    T len = length();
+    if (len > 0) {
+      *this /= len;
+    }
   }
 };
 
+using Vec2i = Vec2<int>;
 using Vec2f = Vec2<float>;
