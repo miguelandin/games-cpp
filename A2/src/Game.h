@@ -1,5 +1,4 @@
 #pragma once
-#include "Entity.hpp"
 #include "EntityManager.hpp"
 #include "imgui/imgui-SFML.h"
 #include "imgui/imgui.h"

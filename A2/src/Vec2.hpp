@@ -1,6 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <cmath>
+#include <string>
 
 template <typename T> class Vec2 {
 public:
@@ -52,6 +53,10 @@ public:
     return *this;
   }
 
+  std::string toString() const {
+    return "[x: " + std::to_string(x) + ", y: " + std::to_string(y) + "]";
+  }
+
   T disSq(const Vec2 &rhs) const {
     T dx = rhs.x - x;
     T dy = rhs.y - y;
@@ -59,6 +64,14 @@ public:
   }
 
   T dis(const Vec2 &rhs) const { return std::sqrt(disSq(rhs)); }
+
+  float angle() const { return std::atan2f(y, x); }
+
+  float angle(const Vec2 &rhs) const {
+    T dx = rhs.x - x;
+    T dy = rhs.y - y;
+    return std::atan2f(dy, dx);
+  }
 
   T lengthSq() const { return (x * x + y * y); }
 
