@@ -35,3 +35,4 @@ bin/
 
 # env variables
 imgui.ini
+compile_flags.txt

@@ -1,5 +1,6 @@
 #include "Entity.hpp"
 #include <map>
+#include <vector>
 
 using EntityVec = std::vector<std::shared_ptr<Entity>>;
 using EntityMap = std::map<std::string, EntityVec>;
@@ -18,12 +19,16 @@ public:
       m_entities.push_back(e);
       m_entityMap[e->tag()].push_back(e);
     }
-    for (auto e : m_entities) {
-      if (!e->isAlive()) {
-        // TODO remove from entities & entitiyMap
-      }
-    }
+
     m_toAdd.clear();
+
+    static auto isDead = [](const auto &e) { return !e->isAlive(); };
+
+    std::erase_if(m_entities, isDead);
+
+    for (auto &[tag, vec] : m_entityMap) {
+      std::erase_if(vec, isDead);
+    }
   }
 
   std::shared_ptr<Entity> addEntity(const std::string &tag) {
