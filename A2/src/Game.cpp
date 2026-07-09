@@ -3,25 +3,71 @@
 #include "imgui/imgui.h"
 #include <SFML/System/Angle.hpp>
 #include <SFML/Window/Keyboard.hpp>
+#include <cstdlib>
+#include <fstream>
 #include <iostream>
+#include <sstream>
+#include <string>
 
 Game::Game(const std::string &config) : m_text(m_font, "Default", 24) {
   init(config);
 }
 
 void Game::init(const std::string &path) {
-  // TODO: read in config file here
-  // use the premade PlayerConfig, EnemyConfig, BulletConfig variables
-  // set up default  window parameters
-  m_window.create(sf::VideoMode({1280, 720}), "Assignment 2");
-  m_window.setKeyRepeatEnabled(false);
-  m_window.setFramerateLimit(60);
+  std::ifstream fin(path);
+  if (!fin.is_open()) {
+    std::cerr << "Config file not found" << std::endl;
+    std::exit(-1);
+  }
 
+  int W, H, FL, FS, S, R, G, B;
+  PlayerConfig pCf;
+  EnemyConfig eCf;
+  BulletConfig bCf;
+  std::string F;
+
+  std::string line;
+  while (std::getline(fin, line)) {
+    if (line.empty() || line.starts_with('#')) {
+      continue;
+    }
+    std::istringstream iss(line);
+    std::string type;
+
+    iss >> type;
+
+    if (type == "Window") {
+      iss >> W >> H >> FL >> FS;
+    } else if (type == "Font") {
+      iss >> F >> S >> R >> G >> B;
+    } else if (type == "Player") {
+      iss >> pCf.SR >> pCf.CR >> pCf.S >> pCf.FR >> pCf.FG >> pCf.FB >>
+          pCf.OR >> pCf.OG >> pCf.OB >> pCf.OT >> pCf.V;
+    } else if (type == "Enemy") {
+      iss >> eCf.SR >> eCf.CR >> eCf.SMIN >> eCf.SMAX >> eCf.OR >> eCf.OG >>
+          eCf.OB >> eCf.OT >> eCf.VMIN >> eCf.VMAX >> eCf.L >> eCf.SI;
+    } else if (type == "Bullet") {
+      iss >> bCf.SR >> bCf.CR >> bCf.S >> bCf.FR >> bCf.FG >> bCf.FB >>
+          bCf.OR >> bCf.OG >> bCf.OB >> bCf.OT >> bCf.V >> bCf.L;
+    }
+  }
+
+  fin.close();
+
+  m_window.create(sf::VideoMode({(u_int)W, (u_int)H}), "Assignment 2");
+  m_window.setKeyRepeatEnabled(false);
+  m_window.setFramerateLimit(FL);
   if (!ImGui::SFML::Init(m_window)) {
+    std::cerr << "Window init exploded" << std::endl;
+    std::exit(-1);
   }
 
   ImGui::GetStyle().ScaleAllSizes(2.0f);
-  ImGui::GetIO().FontGlobalScale = 2.0f;
+  ImGui::GetIO().FontGlobalScale = FS;
+  if (!myFont.openFromFile(F)) {
+    std::cerr << "Font file not found" << std::endl;
+    std::exit(-1);
+  }
 
   spawnPlayer();
 }
@@ -163,15 +209,16 @@ void Game::sRender() {
 
   // set the rotation of the shape based on the entity's transform->angle
   player()->get<CTransform>().angle += 1.0f;
-  player()->get<CShape>().circle.setRotation(sf::degrees(player()->get<CTransform>().angle);
-    
-//draw the entity's sf::CircleShape
-m_window.draw(player()->get<CShape>().cricle);
+  player()->get<CShape>().circle.setRotation(
+      sf::degrees(player()->get<CTransform>().angle));
 
-//draw the ui last
-ImGui::SFML::Render(m_window);
+  // draw the entity's sf::CircleShape
+  m_window.draw(player()->get<CShape>().circle);
 
-m_window.display();
+  // draw the ui last
+  ImGui::SFML::Render(m_window);
+
+  m_window.display();
 }
 
 void Game::sUserInput() {
@@ -200,7 +247,8 @@ void Game::sUserInput() {
             event->getIf<sf::Event::MouseButtonPressed>()) {
       Vec2f mpos(mousePressed->position);
       if (mousePressed->button == sf::Mouse::Button::Left) {
-          //TODO: se puede llamar a la función de spawnBullet directamente aquí, lo mismo con la ulti
+        // TODO: se puede llamar a la función de spawnBullet directamente aquí,
+        // lo mismo con la ulti
       }
     }
   }

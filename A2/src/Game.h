@@ -5,6 +5,8 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 
+sf::Font myFont;
+
 struct PlayerConfig {
   int SR, CR, FR, FG, FB, OR, OG, OB, OT, V;
   float S;
@@ -16,7 +18,7 @@ struct EnemyConfig {
 };
 
 struct BulletConfig {
-  int SR, CR, FR, FG, FB, OR, OG, OB, OT, V;
+  int SR, CR, FR, FG, FB, OR, OG, OB, OT, V, L;
   float S;
 };
 
