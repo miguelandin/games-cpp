@@ -1,12 +1,9 @@
+#pragma once
 #include "Game.h"
-#include "imgui/imgui-SFML.h"
-#include "imgui/imgui.h"
+#include "EntityManager.hpp"
 #include <SFML/System/Angle.hpp>
 #include <SFML/Window/Keyboard.hpp>
 #include <cstdlib>
-#include <fstream>
-#include <iostream>
-#include <sstream>
 #include <string>
 
 Game::Game(const std::string &config) : m_text(m_font, "Default", 24) {
@@ -20,12 +17,6 @@ void Game::init(const std::string &path) {
     std::exit(-1);
   }
 
-  int W, H, FL, FS, S, R, G, B;
-  PlayerConfig pCf;
-  EnemyConfig eCf;
-  BulletConfig bCf;
-  std::string F;
-
   std::string line;
   while (std::getline(fin, line)) {
     if (line.empty() || line.starts_with('#')) {
@@ -37,9 +28,9 @@ void Game::init(const std::string &path) {
     iss >> type;
 
     if (type == "Window") {
-      iss >> W >> H >> FL >> FS;
+      iss >> wCf.W >> wCf.H >> wCf.FL >> wCf.FS;
     } else if (type == "Font") {
-      iss >> F >> S >> R >> G >> B;
+      iss >> fCf.F >> fCf.S >> fCf.R >> fCf.G >> fCf.B;
     } else if (type == "Player") {
       iss >> pCf.SR >> pCf.CR >> pCf.S >> pCf.FR >> pCf.FG >> pCf.FB >>
           pCf.OR >> pCf.OG >> pCf.OB >> pCf.OT >> pCf.V;
@@ -54,17 +45,17 @@ void Game::init(const std::string &path) {
 
   fin.close();
 
-  m_window.create(sf::VideoMode({(u_int)W, (u_int)H}), "Assignment 2");
+  m_window.create(sf::VideoMode({wCf.W, wCf.H}), "Assignment 2");
   m_window.setKeyRepeatEnabled(false);
-  m_window.setFramerateLimit(FL);
+  m_window.setFramerateLimit(wCf.FL);
   if (!ImGui::SFML::Init(m_window)) {
     std::cerr << "Window init exploded" << std::endl;
     std::exit(-1);
   }
 
   ImGui::GetStyle().ScaleAllSizes(2.0f);
-  ImGui::GetIO().FontGlobalScale = FS;
-  if (!myFont.openFromFile(F)) {
+  ImGui::GetIO().FontGlobalScale = fCf.S;
+  if (!myFont.openFromFile(fCf.F)) {
     std::cerr << "Font file not found" << std::endl;
     std::exit(-1);
   }
@@ -106,8 +97,10 @@ void Game::spawnPlayer() {
   // from the  config
   auto e = m_entities.addEntity("player");
   e->add<CTransform>(Vec2f(200.0f, 200.0f), Vec2f(1.0f, 1.0f), 0.0f);
-  e->add<CShape>(32.0f, 8, sf::Color(10, 10, 10), sf::Color(255, 0, 0), 4.0f);
+  e->add<CShape>(pCf.SR, pCf.V, sf::Color(pCf.FR, pCf.FG, pCf.FB),
+                 sf::Color(pCf.OR, pCf.OG, pCf.OB), pCf.OT);
   e->add<CInput>();
+  e->add<CCollision>(pCf.CR);
 }
 
 // spawn an enemy at a random position

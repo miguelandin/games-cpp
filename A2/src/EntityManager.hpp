@@ -1,6 +1,6 @@
+#pragma once
 #include "Entity.hpp"
 #include <map>
-#include <vector>
 
 using EntityVec = std::vector<std::shared_ptr<Entity>>;
 using EntityMap = std::map<std::string, EntityVec>;

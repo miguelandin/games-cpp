@@ -1,11 +1,23 @@
-#pragma once
-#include "EntityManager.hpp"
 #include "imgui/imgui-SFML.h"
 #include "imgui/imgui.h"
-#include <SFML/Graphics.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/System.hpp>
+#include <SFML/Window/Keyboard.hpp>
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
+#include <sstream>
 
-sf::Font myFont;
+struct WindowConfig {
+  unsigned int W, H;
+  int FL;
+  bool FS;
+};
+
+struct FontConfig {
+  std::string F;
+  int S, R, G, B;
+};
 
 struct PlayerConfig {
   int SR, CR, FR, FG, FB, OR, OG, OB, OT, V;
@@ -21,6 +33,14 @@ struct BulletConfig {
   int SR, CR, FR, FG, FB, OR, OG, OB, OT, V, L;
   float S;
 };
+
+WindowConfig wCf;
+FontConfig fCf;
+PlayerConfig pCf;
+EnemyConfig eCf;
+BulletConfig bCf;
+
+sf::Font myFont;
 
 class Game {
   sf::RenderWindow m_window;
