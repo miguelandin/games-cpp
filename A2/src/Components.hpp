@@ -1,9 +1,10 @@
 #pragma once
-#include "Vec2.hpp"
+
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/System/Vector2.hpp>
 
+#include "Vec2.hpp"
 
 class Component {
 public:

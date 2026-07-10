@@ -1,10 +1,9 @@
-#pragma once
 #include "Game.h"
-#include "EntityManager.hpp"
-#include <SFML/System/Angle.hpp>
-#include <SFML/Window/Keyboard.hpp>
+
 #include <cstdlib>
-#include <string>
+#include <fstream>
+#include <iostream>
+#include <sstream>
 
 Game::Game(const std::string &config) : m_text(m_font, "Default", 24) {
   init(config);
@@ -53,7 +52,6 @@ void Game::init(const std::string &path) {
     std::exit(-1);
   }
 
-  ImGui::GetStyle().ScaleAllSizes(2.0f);
   ImGui::GetIO().FontGlobalScale = fCf.S;
   if (!myFont.openFromFile(fCf.F)) {
     std::cerr << "Font file not found" << std::endl;

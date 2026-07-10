@@ -1,12 +1,12 @@
-#include "imgui/imgui-SFML.h"
-#include "imgui/imgui.h"
+#pragma once
+
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/System.hpp>
 #include <SFML/Window/Keyboard.hpp>
-#include <cstdlib>
-#include <fstream>
-#include <iostream>
-#include <sstream>
+
+#include "imgui/imgui-SFML.h"
+#include "imgui/imgui.h"
+#include "EntityManager.hpp"
 
 struct WindowConfig {
   unsigned int W, H;
@@ -34,13 +34,7 @@ struct BulletConfig {
   float S;
 };
 
-WindowConfig wCf;
-FontConfig fCf;
-PlayerConfig pCf;
-EnemyConfig eCf;
-BulletConfig bCf;
 
-sf::Font myFont;
 
 class Game {
   sf::RenderWindow m_window;
@@ -77,6 +71,14 @@ class Game {
   std::shared_ptr<Entity> player();
 
 public:
+WindowConfig wCf;
+FontConfig fCf;
+PlayerConfig pCf;
+EnemyConfig eCf;
+BulletConfig bCf;
+
+sf::Font myFont;
+
   Game(const std::string &config);
   void run();
 };

@@ -1,7 +1,9 @@
 #pragma once
-#include <SFML/Graphics.hpp>
+
 #include <cmath>
 #include <string>
+
+#include <SFML/Graphics.hpp>
 
 template <typename T> class Vec2 {
 public:

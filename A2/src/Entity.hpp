@@ -1,6 +1,8 @@
 #pragma once
-#include "Components.hpp"
+
 #include <tuple>
+
+#include "Components.hpp"
 
 using ComponentTuple =
     std::tuple<CTransform, CShape, CCollision, CInput, CScore, CLifespan>;
