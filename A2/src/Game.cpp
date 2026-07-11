@@ -1,5 +1,6 @@
 #include "Game.h"
 
+#include <SFML/Window/Keyboard.hpp>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -62,7 +63,11 @@ void Game::init(const std::string &path) {
 }
 
 std::shared_ptr<Entity> Game::player() {
-  return m_entities.getEntities("player").back();
+  auto &p = m_entities.getEntities("player");
+  if (!p.empty()) {
+    return p.back();
+  }
+  return nullptr;
 }
 
 void Game::run() {
@@ -76,12 +81,19 @@ void Game::run() {
     // required update call to imgui
     ImGui::SFML::Update(m_window, m_deltaClock.restart());
 
+    std::cout << "P1" << std::endl;
     sUserInput();
+    std::cout << "P2" << std::endl;
     sEnemySpawner();
+    std::cout << "P3" << std::endl;
     sMovement();
+    std::cout << "P4" << std::endl;
     sCollision();
+    std::cout << "P5" << std::endl;
     sGUI();
+    std::cout << "P6" << std::endl;
     sRender();
+    std::cout << "P7" << std::endl;
 
     // increment the current frame
     // may need to be moved when paused implemented
@@ -91,14 +103,19 @@ void Game::run() {
 
 // respawn player in the middle of the screen
 void Game::spawnPlayer() {
-  // TODO: Finish adding all properties of the player with the correct values
-  // from the  config
-  auto e = m_entities.addEntity("player");
-  e->add<CTransform>(Vec2f(200.0f, 200.0f), Vec2f(1.0f, 1.0f), 0.0f);
-  e->add<CShape>(pCf.SR, pCf.V, sf::Color(pCf.FR, pCf.FG, pCf.FB),
-                 sf::Color(pCf.OR, pCf.OG, pCf.OB), pCf.OT);
-  e->add<CInput>();
-  e->add<CCollision>(pCf.CR);
+  std::cout << "P0" << std::endl;
+  static Vec2f spawnCoords = Vec2f((float)wCf.W / 2, (float)wCf.H / 2);
+  if (player() != nullptr) {
+    std::cout << "P-1" << std::endl;
+    player()->get<CTransform>().pos = spawnCoords;
+  } else {
+    auto e = m_entities.addEntity("player");
+    e->add<CTransform>(spawnCoords, Vec2f(), 0.0f);
+    e->add<CShape>(pCf.SR, pCf.V, sf::Color(pCf.FR, pCf.FG, pCf.FB),
+                   sf::Color(pCf.OR, pCf.OG, pCf.OB), pCf.OT);
+    e->add<CInput>();
+    e->add<CCollision>(pCf.CR);
+  }
 }
 
 // spawn an enemy at a random position
@@ -135,17 +152,24 @@ void Game::spawnSpecialWeapon(std::shared_ptr<Entity> entity) {
 }
 
 void Game::sMovement() {
-  // TODO: implement all entity movement in this function
-  // you should read the m_player->cInput component to determine if the player
-  // is moving
-  auto &t =
-      player()
-          ->get<CTransform>(); // se usa por referencia en este caso por que te
-                               // daría una copia el get, pero cuando hagamos un
-                               // for que recorra el vector no hace falta porque
-                               // ya son punteros lo que estás accediendo
-  t.pos.x += t.velocity.x;
-  t.pos.y += t.velocity.y;
+  if (player() != nullptr) {
+    if (auto &t = player()->get<CTransform>(); t.exists) {
+      if (auto &i = player()->get<CInput>(); i.exists) {
+        if (i.up) {
+          t.pos.y -= pCf.S;
+        }
+        if (i.down) {
+          t.pos.y += pCf.S;
+        }
+        if (i.left) {
+          t.pos.x -= pCf.S;
+        }
+        if (i.right) {
+          t.pos.x += pCf.S;
+        }
+      }
+    }
+  }
 }
 
 void Game::sLifespan() {
@@ -223,23 +247,46 @@ void Game::sUserInput() {
       std::exit(0);
     }
 
-    if (const auto *keyPressed = event->getIf<sf::Event::KeyPressed>()) {
-      std::cout << "KEY PRESSED = " << int(keyPressed->scancode) << std::endl;
+    if (auto p = player()) {
+      auto &input = p->get<CInput>();
+      if (input.exists) {
+        if (const auto *keyPressed = event->getIf<sf::Event::KeyPressed>()) {
+          if (keyPressed->scancode == sf::Keyboard::Scancode::W) {
+            input.up = true;
+          }
+          if (keyPressed->scancode == sf::Keyboard::Scancode::S) {
+            input.down = true;
+          }
+          if (keyPressed->scancode == sf::Keyboard::Scancode::A) {
+            input.left = true;
+          }
+          if (keyPressed->scancode == sf::Keyboard::Scancode::D) {
+            input.right = true;
+          }
+        }
+        if (const auto *keyReleased = event->getIf<sf::Event::KeyReleased>()) {
+          if (keyReleased->scancode == sf::Keyboard::Scancode::W) {
+            input.up = false;
+          }
+          if (keyReleased->scancode == sf::Keyboard::Scancode::S) {
+            input.down = false;
+          }
+          if (keyReleased->scancode == sf::Keyboard::Scancode::A) {
+            input.left = false;
+          }
+          if (keyReleased->scancode == sf::Keyboard::Scancode::D) {
+            input.right = false;
+          }
+        }
 
-      if (keyPressed->scancode == sf::Keyboard::Scancode::W) {
-        std::cout << "W Key pressed\n";
-      }
-    }
-
-    if (const auto *keyReleased = event->getIf<sf::Event::KeyReleased>()) {
-    }
-
-    if (const auto *mousePressed =
-            event->getIf<sf::Event::MouseButtonPressed>()) {
-      Vec2f mpos(mousePressed->position);
-      if (mousePressed->button == sf::Mouse::Button::Left) {
-        // TODO: se puede llamar a la función de spawnBullet directamente aquí,
-        // lo mismo con la ulti
+        if (const auto *mousePressed =
+                event->getIf<sf::Event::MouseButtonPressed>()) {
+          Vec2f mpos(mousePressed->position);
+          if (mousePressed->button == sf::Mouse::Button::Left) {
+            // TODO: se puede llamar a la función de spawnBullet directamente
+            // aquí, lo mismo con la ulti
+          }
+        }
       }
     }
   }

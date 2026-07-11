@@ -4,9 +4,9 @@
 #include <SFML/System.hpp>
 #include <SFML/Window/Keyboard.hpp>
 
+#include "EntityManager.hpp"
 #include "imgui/imgui-SFML.h"
 #include "imgui/imgui.h"
-#include "EntityManager.hpp"
 
 struct WindowConfig {
   unsigned int W, H;
@@ -34,8 +34,6 @@ struct BulletConfig {
   float S;
 };
 
-
-
 class Game {
   sf::RenderWindow m_window;
   EntityManager m_entities;
@@ -49,6 +47,12 @@ class Game {
   int m_currentFrame = 0;
   int m_lastEnemySpawnTime = 0;
   bool m_paused = false;
+  WindowConfig wCf;
+  FontConfig fCf;
+  PlayerConfig pCf;
+  EnemyConfig eCf;
+  BulletConfig bCf;
+  sf::Font myFont;
 
   void init(const std::string &config); // read config file
   void setPaused(bool paused);          // pause the game
@@ -71,14 +75,6 @@ class Game {
   std::shared_ptr<Entity> player();
 
 public:
-WindowConfig wCf;
-FontConfig fCf;
-PlayerConfig pCf;
-EnemyConfig eCf;
-BulletConfig bCf;
-
-sf::Font myFont;
-
   Game(const std::string &config);
   void run();
 };
