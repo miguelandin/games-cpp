@@ -1,6 +1,8 @@
 #include "Game.h"
 
 #include <SFML/Window/Keyboard.hpp>
+
+#include <cmath>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -81,19 +83,12 @@ void Game::run() {
     // required update call to imgui
     ImGui::SFML::Update(m_window, m_deltaClock.restart());
 
-    std::cout << "P1" << std::endl;
     sUserInput();
-    std::cout << "P2" << std::endl;
     sEnemySpawner();
-    std::cout << "P3" << std::endl;
     sMovement();
-    std::cout << "P4" << std::endl;
     sCollision();
-    std::cout << "P5" << std::endl;
     sGUI();
-    std::cout << "P6" << std::endl;
     sRender();
-    std::cout << "P7" << std::endl;
 
     // increment the current frame
     // may need to be moved when paused implemented
@@ -103,10 +98,8 @@ void Game::run() {
 
 // respawn player in the middle of the screen
 void Game::spawnPlayer() {
-  std::cout << "P0" << std::endl;
   static Vec2f spawnCoords = Vec2f((float)wCf.W / 2, (float)wCf.H / 2);
   if (player() != nullptr) {
-    std::cout << "P-1" << std::endl;
     player()->get<CTransform>().pos = spawnCoords;
   } else {
     auto e = m_entities.addEntity("player");
@@ -155,17 +148,23 @@ void Game::sMovement() {
   if (player() != nullptr) {
     if (auto &t = player()->get<CTransform>(); t.exists) {
       if (auto &i = player()->get<CInput>(); i.exists) {
+        Vec2f dir;
         if (i.up) {
-          t.pos.y -= pCf.S;
+          dir.y -= 1;
         }
         if (i.down) {
-          t.pos.y += pCf.S;
+          dir.y += 1;
         }
         if (i.left) {
-          t.pos.x -= pCf.S;
+          dir.x -= 1;
         }
         if (i.right) {
-          t.pos.x += pCf.S;
+          dir.x += 1;
+        }
+        if (dir != Vec2f()) {
+          t.velocity = Vec2f(pCf.S * std::cos(dir.angle()),
+                             pCf.S * std::sin(dir.angle()));
+          t.pos += t.velocity;
         }
       }
     }
