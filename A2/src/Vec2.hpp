@@ -79,11 +79,16 @@ public:
 
   T length() const { return std::sqrt(lengthSq()); }
 
-  void normalize() {
+  Vec2 normalize() const {
     T len = length();
     if (len > 0) {
-      *this /= len;
+      return Vec2(x / len, y / len);
     }
+    return Vec2();
+  }
+
+  static Vec2 normalize(float angle) {
+    return Vec2(std::cos(angle), std::sin(angle));
   }
 };
 

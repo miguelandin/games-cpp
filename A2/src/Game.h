@@ -21,7 +21,7 @@ struct FontConfig {
 
 struct PlayerConfig {
   int SR, CR, FR, FG, FB, OR, OG, OB, OT, V;
-  float S;
+  float S, A, F;
 };
 
 struct EnemyConfig {
@@ -37,22 +37,18 @@ struct BulletConfig {
 class Game {
   sf::RenderWindow m_window;
   EntityManager m_entities;
-  sf::Font m_font;
-  sf::Text m_text;
-  PlayerConfig m_platerConfig;
-  EnemyConfig m_enemyConfig;
-  BulletConfig m_bulletConfig;
   sf::Clock m_deltaClock;
   int m_score = 0;
   int m_currentFrame = 0;
   int m_lastEnemySpawnTime = 0;
   bool m_paused = false;
-  WindowConfig wCf;
-  FontConfig fCf;
-  PlayerConfig pCf;
-  EnemyConfig eCf;
-  BulletConfig bCf;
-  sf::Font myFont;
+  WindowConfig m_wCf;
+  FontConfig m_fCf;
+  PlayerConfig m_pCf;
+  EnemyConfig m_eCf;
+  BulletConfig m_bCf;
+  sf::Font m_font;
+  sf::Text m_text;
 
   void init(const std::string &config); // read config file
   void setPaused(bool paused);          // pause the game

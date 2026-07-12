@@ -1,8 +1,8 @@
 #include "Game.h"
+#include "Vec2.hpp"
 
 #include <SFML/Window/Keyboard.hpp>
 
-#include <cmath>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -30,33 +30,36 @@ void Game::init(const std::string &path) {
     iss >> type;
 
     if (type == "Window") {
-      iss >> wCf.W >> wCf.H >> wCf.FL >> wCf.FS;
+      iss >> m_wCf.W >> m_wCf.H >> m_wCf.FL >> m_wCf.FS;
     } else if (type == "Font") {
-      iss >> fCf.F >> fCf.S >> fCf.R >> fCf.G >> fCf.B;
+      iss >> m_fCf.F >> m_fCf.S >> m_fCf.R >> m_fCf.G >> m_fCf.B;
     } else if (type == "Player") {
-      iss >> pCf.SR >> pCf.CR >> pCf.S >> pCf.FR >> pCf.FG >> pCf.FB >>
-          pCf.OR >> pCf.OG >> pCf.OB >> pCf.OT >> pCf.V;
+      iss >> m_pCf.SR >> m_pCf.CR >> m_pCf.S >> m_pCf.A >> m_pCf.F >>
+          m_pCf.FR >> m_pCf.FG >> m_pCf.FB >> m_pCf.OR >> m_pCf.OG >>
+          m_pCf.OB >> m_pCf.OT >> m_pCf.V;
     } else if (type == "Enemy") {
-      iss >> eCf.SR >> eCf.CR >> eCf.SMIN >> eCf.SMAX >> eCf.OR >> eCf.OG >>
-          eCf.OB >> eCf.OT >> eCf.VMIN >> eCf.VMAX >> eCf.L >> eCf.SI;
+      iss >> m_eCf.SR >> m_eCf.CR >> m_eCf.SMIN >> m_eCf.SMAX >> m_eCf.OR >>
+          m_eCf.OG >> m_eCf.OB >> m_eCf.OT >> m_eCf.VMIN >> m_eCf.VMAX >>
+          m_eCf.L >> m_eCf.SI;
     } else if (type == "Bullet") {
-      iss >> bCf.SR >> bCf.CR >> bCf.S >> bCf.FR >> bCf.FG >> bCf.FB >>
-          bCf.OR >> bCf.OG >> bCf.OB >> bCf.OT >> bCf.V >> bCf.L;
+      iss >> m_bCf.SR >> m_bCf.CR >> m_bCf.S >> m_bCf.FR >> m_bCf.FG >>
+          m_bCf.FB >> m_bCf.OR >> m_bCf.OG >> m_bCf.OB >> m_bCf.OT >> m_bCf.V >>
+          m_bCf.L;
     }
   }
 
   fin.close();
 
-  m_window.create(sf::VideoMode({wCf.W, wCf.H}), "Assignment 2");
+  m_window.create(sf::VideoMode({m_wCf.W, m_wCf.H}), "Assignment 2");
   m_window.setKeyRepeatEnabled(false);
-  m_window.setFramerateLimit(wCf.FL);
+  m_window.setFramerateLimit(m_wCf.FL);
   if (!ImGui::SFML::Init(m_window)) {
     std::cerr << "Window init exploded" << std::endl;
     std::exit(-1);
   }
 
-  ImGui::GetIO().FontGlobalScale = fCf.S;
-  if (!myFont.openFromFile(fCf.F)) {
+  ImGui::GetIO().FontGlobalScale = m_fCf.S;
+  if (!m_font.openFromFile(m_fCf.F)) {
     std::cerr << "Font file not found" << std::endl;
     std::exit(-1);
   }
@@ -98,16 +101,16 @@ void Game::run() {
 
 // respawn player in the middle of the screen
 void Game::spawnPlayer() {
-  static Vec2f spawnCoords = Vec2f((float)wCf.W / 2, (float)wCf.H / 2);
+  static Vec2f spawnCoords = Vec2f((float)m_wCf.W / 2, (float)m_wCf.H / 2);
   if (player() != nullptr) {
     player()->get<CTransform>().pos = spawnCoords;
   } else {
     auto e = m_entities.addEntity("player");
     e->add<CTransform>(spawnCoords, Vec2f(), 0.0f);
-    e->add<CShape>(pCf.SR, pCf.V, sf::Color(pCf.FR, pCf.FG, pCf.FB),
-                   sf::Color(pCf.OR, pCf.OG, pCf.OB), pCf.OT);
+    e->add<CShape>(m_pCf.SR, m_pCf.V, sf::Color(m_pCf.FR, m_pCf.FG, m_pCf.FB),
+                   sf::Color(m_pCf.OR, m_pCf.OG, m_pCf.OB), m_pCf.OT);
     e->add<CInput>();
-    e->add<CCollision>(pCf.CR);
+    e->add<CCollision>(m_pCf.CR);
   }
 }
 
@@ -150,22 +153,25 @@ void Game::sMovement() {
       if (auto &i = player()->get<CInput>(); i.exists) {
         Vec2f dir;
         if (i.up) {
-          dir.y -= 1;
+          dir.y -= 1.0f;
         }
         if (i.down) {
-          dir.y += 1;
+          dir.y += 1.0f;
         }
         if (i.left) {
-          dir.x -= 1;
+          dir.x -= 1.0f;
         }
         if (i.right) {
-          dir.x += 1;
+          dir.x += 1.0f;
         }
         if (dir != Vec2f()) {
-          t.velocity = Vec2f(pCf.S * std::cos(dir.angle()),
-                             pCf.S * std::sin(dir.angle()));
-          t.pos += t.velocity;
+          t.velocity += dir.normalize() * m_pCf.A;
         }
+        t.velocity *= m_pCf.F;
+        if (t.velocity.length() > m_pCf.S) {
+          t.velocity = t.velocity.normalize() * m_pCf.S;
+        }
+        t.pos += t.velocity;
       }
     }
   }
