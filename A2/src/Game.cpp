@@ -43,9 +43,9 @@ void Game::init(const std::string &path) {
           m_eCf.OG >> m_eCf.OB >> m_eCf.OT >> m_eCf.VMIN >> m_eCf.VMAX >>
           m_eCf.L >> m_eCf.SI;
     } else if (type == "Bullet") {
-      iss >> m_bCf.SR >> m_bCf.CR >> m_bCf.S >> m_bCf.FR >> m_bCf.FG >>
-          m_bCf.FB >> m_bCf.OR >> m_bCf.OG >> m_bCf.OB >> m_bCf.OT >> m_bCf.V >>
-          m_bCf.L;
+      iss >> m_bCf.SR >> m_bCf.CR >> m_bCf.S >> m_bCf.I >> m_bCf.FR >>
+          m_bCf.FG >> m_bCf.FB >> m_bCf.OR >> m_bCf.OG >> m_bCf.OB >>
+          m_bCf.OT >> m_bCf.V >> m_bCf.L;
     }
   }
 
@@ -138,12 +138,11 @@ void Game::spawnSmallEnemies(std::shared_ptr<Entity> e) {
 
 // spawns a bullet from a given entity to a target location
 void Game::spawnBullet(std::shared_ptr<Entity> entity, const Vec2f &target) {
-  auto dsp = target - entity->get<CTransform>().pos;
-  auto vel = Vec2f::normalize(dsp.angle()) * m_bCf.S;
+  auto t = entity->get<CTransform>();
+  auto dsp = target - t.pos;
+  auto vel = dsp.normalize() * m_bCf.S + t.velocity * m_bCf.I;
   auto bullet = m_entities.addEntity("bullet");
-  bullet->add<CTransform>(entity->get<CTransform>().pos,
-                          vel + entity->get<CTransform>().velocity,
-                          dsp.angle());
+  bullet->add<CTransform>(t.pos, vel, t.angle);
   bullet->add<CShape>(m_bCf.SR, m_bCf.V,
                       sf::Color(m_bCf.FR, m_bCf.FG, m_bCf.FB),
                       sf::Color(m_bCf.OR, m_bCf.OG, m_bCf.OB), m_bCf.OT);
