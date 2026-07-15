@@ -52,7 +52,7 @@ struct Circle : Shape {
 
   Circle(float radius = 50.0f, int segments = 32,
          const sf::Vector2f &pos = {10.0f, 10.0f},
-         const sf::Vector2f &vel = {1.0f, 0.5f},
+         const sf::Vector2f &vel = {10.0f, 5.0f},
          const std::array<float, 3> &color = {0.0f, 1.0f, 1.0f},
          const char *newText = "Circle")
       : Shape(std::make_unique<sf::CircleShape>(radius, segments), pos, vel,

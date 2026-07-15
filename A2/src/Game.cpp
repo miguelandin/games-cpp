@@ -1,6 +1,7 @@
 #include "Game.h"
 #include "Vec2.hpp"
 
+#include <SFML/System/Angle.hpp>
 #include <SFML/Window/Keyboard.hpp>
 
 #include <cstdlib>
@@ -137,9 +138,15 @@ void Game::spawnSmallEnemies(std::shared_ptr<Entity> e) {
 
 // spawns a bullet from a given entity to a target location
 void Game::spawnBullet(std::shared_ptr<Entity> entity, const Vec2f &target) {
-  // TODO: implement the spawning of a bullet wich travels toward a target
-  //    - bullet speed is given as a scalar speed
-  //    - you must set the velocity by using formula in notes
+  auto dsp = target - entity->get<CTransform>().pos;
+  auto vel = Vec2f::normalize(dsp.angle()) * m_bCf.S;
+  auto bullet = m_entities.addEntity("bullet");
+  bullet->add<CTransform>(entity->get<CTransform>().pos, vel, dsp.angle());
+  bullet->add<CShape>(m_bCf.SR, m_bCf.V,
+                      sf::Color(m_bCf.FR, m_bCf.FG, m_bCf.FB),
+                      sf::Color(m_bCf.OR, m_bCf.OG, m_bCf.OB), m_bCf.OT);
+  bullet->add<CCollision>(m_bCf.CR);
+  bullet->add<CLifespan>(m_bCf.L);
 }
 
 void Game::spawnSpecialWeapon(std::shared_ptr<Entity> entity) {
@@ -221,21 +228,20 @@ void Game::sRender() {
     return;
   }
 
-  // TODO: change the code below to draw ALL of the entities
   m_window.clear();
 
-  // set the position of the shape based on the entity's transform->pos
-  player()->get<CShape>().circle.setPosition(player()->get<CTransform>().pos);
+  for (auto &e : m_entities.getEntities()) {
+    if (auto &s = e->get<CShape>(); s.exists) {
+      if (auto &t = e->get<CTransform>(); t.exists) {
+        s.circle.setPosition(t.pos);
+        t.angle += 1.0f;
+        std::cout << t.angle << std::endl;
+        s.circle.setRotation(sf::degrees(t.angle));
+      }
+      m_window.draw(s.circle);
+    }
+  }
 
-  // set the rotation of the shape based on the entity's transform->angle
-  player()->get<CTransform>().angle += 1.0f;
-  player()->get<CShape>().circle.setRotation(
-      sf::degrees(player()->get<CTransform>().angle));
-
-  // draw the entity's sf::CircleShape
-  m_window.draw(player()->get<CShape>().circle);
-
-  // draw the ui last
   ImGui::SFML::Render(m_window);
 
   m_window.display();
@@ -288,8 +294,8 @@ void Game::sUserInput() {
                 event->getIf<sf::Event::MouseButtonPressed>()) {
           Vec2f mpos(mousePressed->position);
           if (mousePressed->button == sf::Mouse::Button::Left) {
-            // TODO: se puede llamar a la función de spawnBullet directamente
-            // aquí, lo mismo con la ulti
+            std::cout << "BULLET" << p->id() << mpos.toString() << std::endl;
+            spawnBullet(p, mpos);
           }
         }
       }
