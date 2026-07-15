@@ -141,7 +141,9 @@ void Game::spawnBullet(std::shared_ptr<Entity> entity, const Vec2f &target) {
   auto dsp = target - entity->get<CTransform>().pos;
   auto vel = Vec2f::normalize(dsp.angle()) * m_bCf.S;
   auto bullet = m_entities.addEntity("bullet");
-  bullet->add<CTransform>(entity->get<CTransform>().pos, vel, dsp.angle());
+  bullet->add<CTransform>(entity->get<CTransform>().pos,
+                          vel + entity->get<CTransform>().velocity,
+                          dsp.angle());
   bullet->add<CShape>(m_bCf.SR, m_bCf.V,
                       sf::Color(m_bCf.FR, m_bCf.FG, m_bCf.FB),
                       sf::Color(m_bCf.OR, m_bCf.OG, m_bCf.OB), m_bCf.OT);
@@ -180,6 +182,12 @@ void Game::sMovement() {
         }
         t.pos += t.velocity;
       }
+    }
+  }
+
+  for (auto &b : m_entities.getEntities("bullet")) {
+    if (auto &t = b->get<CTransform>(); t.exists) {
+      t.pos += t.velocity;
     }
   }
 }

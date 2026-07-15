@@ -9,7 +9,7 @@
 #	size				S			int
 #	color				R,G,B		int,int,int
 
-# player SR CR S A F FR FG FB OR OG OB OT P
+# player SR CR S A F FR FG FB OR OG OB OT V
 #	shape radius		SR			float
 #	collision radius	CR			int
 #	speed				S			float
@@ -18,7 +18,7 @@
 #	fill color rgb		FR,FG,FB	int,int,int
 #	outline color rgb	OR,OG.OB	int,int,int
 #	outline thickness	OT			float
-#	point count			p			int #name changed to align with SFML circle def
+#	point count			V			int
 
 # enemy SR CR SMIN SMAX OR OG OB OT PMIN PMAX L SI
 #	shape radius		SR			float 
@@ -30,18 +30,18 @@
 #	small lifespan		L			int
 #	spawn internal		SI			int
 
-# bullet SR CR S FR FG FB OR OG OB OT P L
+# bullet SR CR S FR FG FB OR OG OB OT V L
 #	shape radius		SR			float
 #	collision radius	CR			int 
 #	speed				S			float
 #	fill color rgb		FR,FG,FB	int,int,int
 #	outline color rgb	OR,OG,OB	int, int, int
 #	outline thickness	OT			float
-#	shape points		P			int
+#	shape points		V			int
 #	lifespan			L			int
 
 Window 1280 720 60 1
 Font fonts/tech.ttf 2 255 255 255
 Player 32 32 8 2 0.90 5 5 5 255 0 0 4 8
 Enemy 32 32 3 3 255 255 255 2 3 8 90 60
-Bullet 10 10 8 255 255 255 255 255 255 2 20 90
+Bullet 10 10 16 255 255 255 255 255 255 2 20 90
