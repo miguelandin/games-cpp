@@ -71,3 +71,11 @@ public:
 
   CInput() = default;
 };
+
+class CBounciness : public Component {
+public:
+  int remaining = 0;
+  bool infinite = false;
+
+  CBounciness() = default;
+};

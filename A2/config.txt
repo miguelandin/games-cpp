@@ -20,15 +20,17 @@
 #	outline thickness	OT			float
 #	point count			V			int
 
-# enemy SR CR SMIN SMAX OR OG OB OT PMIN PMAX L SI
+# enemy SR CR SMIN SMAX OR OG OB OT VMIN VMAX L SI M T
 #	shape radius		SR			float 
 #	collision radius	CR			int 
 #	min / max speed		SMIN, SMAX	float,float
 #	outline color rgb	OR,OG,OB	int, int, int
 #	outline thickness	OT			float
-#	min/max points		PMIN,PMAX	int,int	
+#	min/max points		VMIN,VMAX	int,int	
 #	small lifespan		L			int
 #	spawn internal		SI			int
+#   spawn margin        M           int
+#   spawn tries         T           int
 
 # bullet SR CR S I FR FG FB OR OG OB OT V L
 #	shape radius		SR			float
@@ -41,8 +43,8 @@
 #	shape points		V			int
 #	lifespan			L			int
 
-Window 1280 720 60 1
+Window 1920 1080 60 1
 Font fonts/tech.ttf 2 255 255 255
 Player 32 32 8 2 0.90 5 5 5 255 0 0 4 8
-Enemy 32 32 3 3 255 255 255 2 3 8 90 60
+Enemy 32 32 3 6.0 255 255 255 2 3 8 90 60 3
 Bullet 10 10 8 0.4 255 255 255 255 255 255 2 20 90

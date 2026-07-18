@@ -41,7 +41,7 @@ void Game::init(const std::string &path) {
     } else if (type == "Enemy") {
       iss >> m_eCf.SR >> m_eCf.CR >> m_eCf.SMIN >> m_eCf.SMAX >> m_eCf.OR >>
           m_eCf.OG >> m_eCf.OB >> m_eCf.OT >> m_eCf.VMIN >> m_eCf.VMAX >>
-          m_eCf.L >> m_eCf.SI;
+          m_eCf.L >> m_eCf.SI >> m_eCf.M >> m_eCf.T;
     } else if (type == "Bullet") {
       iss >> m_bCf.SR >> m_bCf.CR >> m_bCf.S >> m_bCf.I >> m_bCf.FR >>
           m_bCf.FG >> m_bCf.FB >> m_bCf.OR >> m_bCf.OG >> m_bCf.OB >>
@@ -116,13 +116,13 @@ void Game::spawnPlayer() {
 }
 
 // spawn an enemy at a random position
-void Game::spawnEnemy() {
-  // TODO: make suer the enemy is spawned properly with the m_enemyConfig
-  // variables the enemy must be spawned completely within the bounds of the
-  // window
-  //
-
-  // record when the most recent enemy was spawned
+void Game::spawnEnemy(size_t points, const sf::Color &fill, const Vec2f &p,
+                      const Vec2f &v, float angle) {
+  auto e = m_entities.addEntity("enemy");
+  e->add<CShape>(m_eCf.SR, points, fill,
+                 sf::Color(m_eCf.OR, m_eCf.OG, m_eCf.OB), m_eCf.OT);
+  e->add<CTransform>(p, v, angle);
+  e->add<CCollision>(m_eCf.CR);
   m_lastEnemySpawnTime = m_currentFrame;
 }
 
@@ -204,24 +204,50 @@ void Game::sLifespan() {
   //
 }
 
+bool Game::isColliding(const Vec2f &p1, const Vec2f &p2, float r1, float r2) {
+  return p1.disSq(p2) < (r1 + r2) * (r1 + r2);
+}
+
 void Game::sCollision() {
   // TODO::implement all proper collision between entities
   //   be sure to use the collision radius, Not the shape radius
 
   // estas no son tdas las colisiones
-  for (auto b : m_entities.getEntities("bullet")) {
-    for (auto e : m_entities.getEntities("enemy")) {
+  for (auto &b : m_entities.getEntities("bullet")) {
+    for (auto &e : m_entities.getEntities("enemy")) {
       // do collision logic
     }
 
-    for (auto e : m_entities.getEntities("bullet")) {
-      // do collision logic
+    for (auto &e : m_entities.getEntities("bullet")) {
     }
   }
 }
 
 void Game::sEnemySpawner() {
-  // TODO: code wich implements enemy spawning should go here
+  static auto rng = [](auto min, auto max) {
+    return min + (std::fmod(rand(), (1 + max - min)));
+  };
+
+  if (m_currentFrame - m_lastEnemySpawnTime > m_eCf.SI) {
+    Vec2f pos;
+    int t = 0;
+    do {
+      if (t > m_eCf.T) {
+        return;
+      }
+      pos = Vec2f(rng(0, m_wCf.W), rng(0, m_wCf.H));
+      t++;
+    } while (isColliding(player()->get<CTransform>().pos, pos,
+                         m_pCf.CR * m_eCf.M, m_eCf.CR));
+    auto speed = rng(m_eCf.SMIN, m_eCf.SMAX);
+    auto points = rng(m_eCf.VMIN, m_eCf.VMAX);
+    auto color = sf::Color(rng(0, 255), rng(0, 255), rng(0, 255));
+    auto angle = rng(0, std::numbers::pi * 2);
+    auto vel = Vec2f(angle) * speed;
+
+    spawnEnemy(points, color, pos, vel, angle);
+    m_lastEnemySpawnTime = m_currentFrame;
+  }
 }
 
 void Game::sGUI() {
@@ -242,7 +268,6 @@ void Game::sRender() {
       if (auto &t = e->get<CTransform>(); t.exists) {
         s.circle.setPosition(t.pos);
         t.angle += 1.0f;
-        std::cout << t.angle << std::endl;
         s.circle.setRotation(sf::degrees(t.angle));
       }
       m_window.draw(s.circle);
@@ -301,7 +326,6 @@ void Game::sUserInput() {
                 event->getIf<sf::Event::MouseButtonPressed>()) {
           Vec2f mpos(mousePressed->position);
           if (mousePressed->button == sf::Mouse::Button::Left) {
-            std::cout << "BULLET" << p->id() << mpos.toString() << std::endl;
             spawnBullet(p, mpos);
           }
         }

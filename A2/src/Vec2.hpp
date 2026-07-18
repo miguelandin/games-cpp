@@ -12,6 +12,7 @@ public:
 
   Vec2() = default;
   Vec2(T xin, T yin) : x(xin), y(yin) {}
+  Vec2(T a) : x(std::cos(a)), y(std::sin(a)) {}
 
   template <typename U>
   Vec2(const sf::Vector2<U> &vec)

@@ -25,7 +25,7 @@ struct PlayerConfig {
 };
 
 struct EnemyConfig {
-  int SR, CR, OR, OG, OB, OT, VMIN, VMAX, L, SI;
+  int SR, CR, OR, OG, OB, OT, VMIN, VMAX, L, SI, M, T;
   float SMIN, SMAX;
 };
 
@@ -63,12 +63,15 @@ class Game {
   void sCollision();
 
   void spawnPlayer();
-  void spawnEnemy();
+  void spawnEnemy(size_t points, const sf::Color &fill, const Vec2f &p,
+                  const Vec2f &v, float angle);
   void spawnSmallEnemies(std::shared_ptr<Entity> entity);
   void spawnBullet(std::shared_ptr<Entity> entity, const Vec2f &mousePos);
   void spawnSpecialWeapon(std::shared_ptr<Entity> entity);
 
   std::shared_ptr<Entity> player();
+
+  bool isColliding(const Vec2f &p1, const Vec2f &p2, float r1, float r2);
 
 public:
   Game(const std::string &config);
