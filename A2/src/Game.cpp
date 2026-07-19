@@ -89,6 +89,7 @@ void Game::run() {
 
     sUserInput();
     sEnemySpawner();
+    sLifespan();
     sMovement();
     sCollision();
     sGUI();
@@ -192,16 +193,23 @@ void Game::sMovement() {
 }
 
 void Game::sLifespan() {
-  // TODO: implement all lifespawn functionality
-  //
-  // for all entities
-  //   if entity has no lifespan component, skip it
-  //   if entity has > 0 remaining lifespan, subtract 1
-  //   if it has lifespan and is alive
-  //       scale its alpha channel properly
-  //    if it has lifespan and its time is up
-  //        destroy the entity
-  //
+  for (auto &e : m_entities.getEntities()) {
+    if (auto &l = e->get<CLifespan>(); l.exists) {
+      if (l.remaining > 0) {
+        l.remaining--;
+        if (auto &s = e->get<CShape>(); s.exists) {
+          auto f = s.circle.getFillColor();
+          auto o = s.circle.getOutlineColor();
+          f.a = (255 * l.remaining) / l.lifespan;
+          o.a = f.a;
+          s.circle.setFillColor(f);
+          s.circle.setOutlineColor(o);
+        }
+      } else {
+        e->destroy();
+      }
+    }
+  }
 }
 
 bool Game::isColliding(const Vec2f &p1, const Vec2f &p2, float r1, float r2) {
@@ -235,7 +243,8 @@ void Game::sEnemySpawner() {
       if (t > m_eCf.T) {
         return;
       }
-      pos = Vec2f(rng(0, m_wCf.W), rng(0, m_wCf.H));
+      pos = Vec2f(rng(m_eCf.CR, m_wCf.W - m_eCf.CR),
+                  rng(m_eCf.CR, m_wCf.H - m_eCf.CR));
       t++;
     } while (isColliding(player()->get<CTransform>().pos, pos,
                          m_pCf.CR * m_eCf.M, m_eCf.CR));
