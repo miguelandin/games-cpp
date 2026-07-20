@@ -185,9 +185,11 @@ void Game::sMovement() {
     }
   }
 
-  for (auto &b : m_entities.getEntities("bullet")) {
-    if (auto &t = b->get<CTransform>(); t.exists) {
-      t.pos += t.velocity;
+  for (auto &e : m_entities.getEntities()) {
+    if (auto &t = e->get<CTransform>(); t.exists) {
+      if (e->id() != player()->id()) {
+        t.pos += t.velocity;
+      }
     }
   }
 }
@@ -216,19 +218,46 @@ bool Game::isColliding(const Vec2f &p1, const Vec2f &p2, float r1, float r2) {
   return p1.disSq(p2) < (r1 + r2) * (r1 + r2);
 }
 
-void Game::sCollision() {
-  // TODO::implement all proper collision between entities
-  //   be sure to use the collision radius, Not the shape radius
-
-  // estas no son tdas las colisiones
-  for (auto &b : m_entities.getEntities("bullet")) {
-    for (auto &e : m_entities.getEntities("enemy")) {
-      // do collision logic
-    }
-
-    for (auto &e : m_entities.getEntities("bullet")) {
+void Game::manageCollision(std::shared_ptr<Entity> entity) {
+  if (auto &t = entity->get<CTransform>(); t.exists) {
+    if (auto &c = entity->get<CCollision>(); c.exists) {
+      if (t.pos.x - c.radius <= 0) {
+        t.velocity.x *= -1;
+        t.pos.x = 0 + c.radius;
+      } else if (t.pos.x + c.radius >= m_wCf.W) {
+        t.velocity.x *= -1;
+        t.pos.x = m_wCf.W - c.radius;
+      }
+      if (t.pos.y - c.radius <= 0) {
+        t.velocity.y *= -1;
+        t.pos.y = 0 + c.radius;
+      } else if (t.pos.y + c.radius >= m_wCf.H) {
+        t.velocity.y *= -1;
+        t.pos.y = m_wCf.H - c.radius;
+      }
     }
   }
+}
+
+void Game::sCollision() {
+  for (auto &e : m_entities.getEntities("enemy")) {
+    for (auto &b : m_entities.getEntities("bullet")) {
+      if (isColliding(e->get<CTransform>().pos, b->get<CTransform>().pos,
+                      b->get<CCollision>().radius,
+                      e->get<CCollision>().radius)) {
+        b->destroy();
+        e->destroy();
+      }
+    }
+    if (isColliding(player()->get<CTransform>().pos, e->get<CTransform>().pos,
+                    player()->get<CCollision>().radius,
+                    e->get<CCollision>().radius)) {
+      e->destroy();
+      spawnPlayer();
+    }
+    manageCollision(e);
+  }
+  manageCollision(player());
 }
 
 void Game::sEnemySpawner() {
@@ -289,10 +318,8 @@ void Game::sRender() {
 }
 
 void Game::sUserInput() {
-  // TODO: handle user input here
 
   while (auto event = m_window.pollEvent()) {
-    // pass the event to imgui to be parsed
     ImGui::SFML::ProcessEvent(m_window, *event);
 
     if (event->is<sf::Event::Closed>()) {

@@ -73,6 +73,8 @@ class Game {
 
   bool isColliding(const Vec2f &p1, const Vec2f &p2, float r1, float r2);
 
+  void manageCollision(std::shared_ptr<Entity> entity);
+
 public:
   Game(const std::string &config);
   void run();
