@@ -4,8 +4,8 @@
 
 #include "Components.hpp"
 
-using ComponentTuple =
-    std::tuple<CTransform, CShape, CCollision, CInput, CScore, CLifespan>;
+using ComponentTuple = std::tuple<CTransform, CShape, CCollision, CInput,
+                                  CScore, CLifespan, CWeapon>;
 
 class Entity {
   friend class EntityManager;

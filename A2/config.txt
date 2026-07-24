@@ -43,8 +43,8 @@
 #	shape points		V			int
 #	lifespan			L			int
 
-Window 1920 1080 60 1
+Window 1920 1200 60 1
 Font fonts/tech.ttf 2 255 255 255
 Player 32 32 8 2 0.90 5 5 5 255 0 0 4 8
 Enemy 32 32 3 6.0 255 255 255 2 3 8 90 60 3 10
-Bullet 10 10 8 0.4 255 255 255 255 255 255 2 20 90
+Bullet 10 10 8 0.6 255 255 255 255 255 255 2 20 90

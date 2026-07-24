@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "Components.hpp"
 #include "Vec2.hpp"
 
 #include <SFML/System/Angle.hpp>
@@ -7,6 +8,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <ostream>
 #include <sstream>
 
 Game::Game(const std::string &config) : m_text(m_font, "Default", 24) {
@@ -91,6 +93,7 @@ void Game::run() {
     sEnemySpawner();
     sLifespan();
     sMovement();
+    sShooting();
     sCollision();
     sGUI();
     sRender();
@@ -113,6 +116,7 @@ void Game::spawnPlayer() {
                    sf::Color(m_pCf.OR, m_pCf.OG, m_pCf.OB), m_pCf.OT);
     e->add<CInput>();
     e->add<CCollision>(m_pCf.CR);
+    e->add<CWeapon>();
   }
 }
 
@@ -137,7 +141,6 @@ void Game::spawnSmallEnemies(std::shared_ptr<Entity> e) {
   // - small enemies are worth double points of the original enemy
 }
 
-// spawns a bullet from a given entity to a target location
 void Game::spawnBullet(std::shared_ptr<Entity> entity, const Vec2f &target) {
   auto t = entity->get<CTransform>();
   auto dsp = target - t.pos;
@@ -161,16 +164,16 @@ void Game::sMovement() {
     if (auto &t = player()->get<CTransform>(); t.exists) {
       if (auto &i = player()->get<CInput>(); i.exists) {
         Vec2f dir;
-        if (i.up) {
+        if (i.w) {
           dir.y -= 1.0f;
         }
-        if (i.down) {
+        if (i.s) {
           dir.y += 1.0f;
         }
-        if (i.left) {
+        if (i.a) {
           dir.x -= 1.0f;
         }
-        if (i.right) {
+        if (i.d) {
           dir.x += 1.0f;
         }
         if (dir != Vec2f()) {
@@ -317,7 +320,77 @@ void Game::sRender() {
   m_window.display();
 }
 
+void Game::sShooting() {
+  auto p = player()->get<CTransform>().pos;
+  if (auto &w = player()->get<CWeapon>(); w.exists) {
+    if (m_currentFrame > w.lastFired + w.fireRate) {
+      if (auto &i = player()->get<CInput>(); i.exists) {
+        Vec2f dir;
+        if (i.up) {
+          dir.y -= 1.0f;
+        }
+        if (i.down) {
+          dir.y += 1.0f;
+        }
+        if (i.left) {
+          dir.x -= 1.0f;
+        }
+        if (i.right) {
+          dir.x += 1.0f;
+        }
+        if (dir != Vec2f()) {
+          spawnBullet(player(), dir + p);
+          w.lastFired = m_currentFrame;
+        }
+      }
+    }
+  }
+
+  for (auto &e : m_entities.getEntities("enemy")) {
+    if (auto &w = e->get<CWeapon>(); w.exists) {
+      if (m_currentFrame > w.lastFired + w.fireRate) {
+        spawnBullet(e, p);
+        w.lastFired = m_currentFrame;
+      }
+    }
+  }
+}
+
 void Game::sUserInput() {
+  static auto updateInput = [](CInput &input, sf::Keyboard::Scancode code,
+                               bool isPressed) {
+    switch (code) {
+    case sf::Keyboard::Scancode::W:
+      input.w = isPressed;
+      break;
+    case sf::Keyboard::Scancode::A:
+      input.a = isPressed;
+      break;
+    case sf::Keyboard::Scancode::S:
+      input.s = isPressed;
+      break;
+    case sf::Keyboard::Scancode::D:
+      input.d = isPressed;
+      break;
+    case sf::Keyboard::Scancode::Up:
+      input.up = isPressed;
+      break;
+    case sf::Keyboard::Scancode::Left:
+      input.left = isPressed;
+      break;
+    case sf::Keyboard::Scancode::Down:
+      input.down = isPressed;
+      break;
+    case sf::Keyboard::Scancode::Right:
+      input.right = isPressed;
+      break;
+    case sf::Keyboard::Scancode::Space:
+      input.special = isPressed;
+      break;
+    default:
+      break;
+    }
+  };
 
   while (auto event = m_window.pollEvent()) {
     ImGui::SFML::ProcessEvent(m_window, *event);
@@ -329,41 +402,12 @@ void Game::sUserInput() {
     if (auto p = player()) {
       auto &input = p->get<CInput>();
       if (input.exists) {
-        if (const auto *keyPressed = event->getIf<sf::Event::KeyPressed>()) {
-          if (keyPressed->scancode == sf::Keyboard::Scancode::W) {
-            input.up = true;
-          }
-          if (keyPressed->scancode == sf::Keyboard::Scancode::S) {
-            input.down = true;
-          }
-          if (keyPressed->scancode == sf::Keyboard::Scancode::A) {
-            input.left = true;
-          }
-          if (keyPressed->scancode == sf::Keyboard::Scancode::D) {
-            input.right = true;
-          }
-        }
-        if (const auto *keyReleased = event->getIf<sf::Event::KeyReleased>()) {
-          if (keyReleased->scancode == sf::Keyboard::Scancode::W) {
-            input.up = false;
-          }
-          if (keyReleased->scancode == sf::Keyboard::Scancode::S) {
-            input.down = false;
-          }
-          if (keyReleased->scancode == sf::Keyboard::Scancode::A) {
-            input.left = false;
-          }
-          if (keyReleased->scancode == sf::Keyboard::Scancode::D) {
-            input.right = false;
-          }
-        }
 
-        if (const auto *mousePressed =
-                event->getIf<sf::Event::MouseButtonPressed>()) {
-          Vec2f mpos(mousePressed->position);
-          if (mousePressed->button == sf::Mouse::Button::Left) {
-            spawnBullet(p, mpos);
-          }
+        if (const auto *pressed = event->getIf<sf::Event::KeyPressed>()) {
+          updateInput(input, pressed->scancode, true);
+        } else if (const auto *released =
+                       event->getIf<sf::Event::KeyReleased>()) {
+          updateInput(input, released->scancode, false);
         }
       }
     }

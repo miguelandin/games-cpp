@@ -62,6 +62,10 @@ public:
 
 class CInput : public Component {
 public:
+  bool w = false;
+  bool a = false;
+  bool s = false;
+  bool d = false;
   bool up = false;
   bool left = false;
   bool right = false;
@@ -78,4 +82,12 @@ public:
   bool infinite = false;
 
   CBounciness() = default;
+};
+
+class CWeapon : public Component {
+public:
+  int fireRate = 15;
+  int lastFired = 0;
+
+  CWeapon() = default;
 };

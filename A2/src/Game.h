@@ -61,12 +61,16 @@ class Game {
   void sGUI();
   void sEnemySpawner();
   void sCollision();
+  void sShooting();
 
   void spawnPlayer();
+
   void spawnEnemy(size_t points, const sf::Color &fill, const Vec2f &p,
                   const Vec2f &v, float angle);
   void spawnSmallEnemies(std::shared_ptr<Entity> entity);
+
   void spawnBullet(std::shared_ptr<Entity> entity, const Vec2f &mousePos);
+
   void spawnSpecialWeapon(std::shared_ptr<Entity> entity);
 
   std::shared_ptr<Entity> player();
